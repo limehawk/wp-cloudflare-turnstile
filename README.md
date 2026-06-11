@@ -51,6 +51,8 @@ This plugin's Gravity Forms integration exists for sites that haven't installed 
   ```
 
 - **Comments via REST API** are exempt from verification (REST comment creation requires authentication by default).
+- **Trackbacks are effectively disabled** when comment protection is on — `wp-trackback.php` submissions carry no token and fail closed. Pingbacks (XML-RPC) are exempt. Given trackback spam volume, we consider this a feature.
+- **Multisite signup (`wp-signup.php`) is not covered** — it uses a different form pipeline than single-site registration.
 - **WooCommerce checkout** is not covered — guest checkout protection has too many theme/plugin interactions to do reliably in a lightweight plugin. Cloudflare's own WAF or rate limiting is a better fit there.
 
 ## Hooks
@@ -58,6 +60,7 @@ This plugin's Gravity Forms integration exists for sites that haven't installed 
 | Hook | Type | Purpose |
 |------|------|---------|
 | `wpcft_verify_login` | filter | Return `false` to skip login verification for a request |
+| `wpcft_verify_lostpassword` | filter | Return `false` to skip lost-password verification for a request |
 | `wpcft_error_message` | filter | Customize the user-facing error message |
 
 ## Hardening extras

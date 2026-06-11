@@ -22,7 +22,12 @@
             var container = document.createElement("div");
             container.className = "cf-turnstile";
             container.style.cssText = "margin: 10px 0 15px 0;";
-            submit.parentNode.parentNode.insertBefore(container, submit.parentNode);
+            // Insert before the button's field-group wrapper when present,
+            // else directly before the button — always inside the <form> so
+            // the token posts with the submission.
+            var anchor = (submit.closest && submit.closest(".elementor-field-group")) || submit;
+            if (anchor === form || !form.contains(anchor)) anchor = submit;
+            anchor.parentNode.insertBefore(container, anchor);
 
             var widgetId = window.turnstile.render(container, {
                 sitekey: settings.sitekey,
@@ -64,10 +69,11 @@
             });
         }
 
-        // Reset the widget when a submission fails (token already consumed).
-        // Elementor triggers a jQuery "error" event on the form element.
+        // Tokens are single-use — reset after every submission outcome.
+        // Elementor triggers jQuery "submit_error" / "submit_success" events
+        // on the form element.
         if (window.jQuery) {
-            window.jQuery(document).on("error", ".elementor-form", function () {
+            window.jQuery(document).on("submit_error submit_success", ".elementor-form", function () {
                 resetWidget(this);
             });
         }

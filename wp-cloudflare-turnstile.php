@@ -3,7 +3,7 @@
  * Plugin Name: WP Cloudflare Turnstile
  * Plugin URI: https://github.com/limehawk/wp-cloudflare-turnstile
  * Description: Cloudflare Turnstile protection for WordPress core forms, WooCommerce, Elementor Pro Forms, and Gravity Forms.
- * Version: 2.0.0
+ * Version: 2.0.1
  * Author: Limehawk
  * Author URI: https://limehawk.io
  * License: MIT
@@ -14,7 +14,7 @@
 
 defined("ABSPATH") || exit;
 
-define("WPCFT_VERSION", "2.0.0");
+define("WPCFT_VERSION", "2.0.1");
 define("WPCFT_PLUGIN_DIR", plugin_dir_path(__FILE__));
 define("WPCFT_PLUGIN_URL", plugin_dir_url(__FILE__));
 
@@ -73,10 +73,10 @@ class Turnstile_Protection {
             add_filter("preprocess_comment", [__CLASS__, "verify_comment"]);
         }
 
-        // Integrations — each file guards on its plugin being active.
-        if (self::enabled("woocommerce")) {
-            require_once WPCFT_PLUGIN_DIR . "includes/integrations/woocommerce.php";
-        }
+        // Integrations — each file guards on its plugin being active and
+        // handles its own toggle (WooCommerce must load even when toggled
+        // off, to exempt its forms from the shared core login checks).
+        require_once WPCFT_PLUGIN_DIR . "includes/integrations/woocommerce.php";
         if (self::enabled("elementor")) {
             require_once WPCFT_PLUGIN_DIR . "includes/integrations/elementor.php";
         }
@@ -240,7 +240,7 @@ class Turnstile_Protection {
             "body" => [
                 "secret"   => self::$secret_key,
                 "response" => $token,
-                "remoteip" => $_SERVER["REMOTE_ADDR"] ?? "",
+                "remoteip" => self::client_ip(),
             ],
         ]);
 
@@ -250,6 +250,21 @@ class Turnstile_Protection {
 
         $result = json_decode(wp_remote_retrieve_body($response), true);
         return self::$verify_cache = !empty($result["success"]);
+    }
+
+    /**
+     * Real client IP for siteverify's remoteip. Behind Cloudflare's proxy,
+     * REMOTE_ADDR is the edge IP unless the host restores it — sending that
+     * would risk a verification mismatch. Prefer CF-Connecting-IP.
+     */
+    public static function client_ip() {
+        if (!empty($_SERVER["HTTP_CF_CONNECTING_IP"])) {
+            $ip = sanitize_text_field(wp_unslash($_SERVER["HTTP_CF_CONNECTING_IP"]));
+            if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                return $ip;
+            }
+        }
+        return $_SERVER["REMOTE_ADDR"] ?? "";
     }
 
     public static function error_message() {
@@ -289,6 +304,7 @@ class Turnstile_Protection {
 
     public static function verify_lostpassword($errors) {
         if (self::is_programmatic_request()) return;
+        if (!apply_filters("wpcft_verify_lostpassword", true)) return;
         if (!self::verify_token()) {
             $errors->add("turnstile_failed", "<strong>Error:</strong> " . self::error_message());
         }
