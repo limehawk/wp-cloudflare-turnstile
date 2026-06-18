@@ -7,13 +7,12 @@ Lightweight [Cloudflare Turnstile](https://www.cloudflare.com/products/turnstile
 - **WordPress core**: login, registration, lost password, comments
 - **WooCommerce**: login, registration, lost password (My Account forms)
 - **Elementor Pro Forms**: all forms, including ones inside popups
-- **Gravity Forms**: all forms (see note below)
 
 Each surface has its own on/off toggle in settings.
 
 ## What it deliberately doesn't do
 
-Most major form plugins now ship native Turnstile support — use theirs, not another plugin layer:
+If your form plugin already ships native Turnstile support, use theirs — it's first-party and better maintained. Don't stack this on top of it:
 
 | Plugin | Native support |
 |--------|----------------|
@@ -22,7 +21,7 @@ Most major form plugins now ship native Turnstile support — use theirs, not an
 | Gravity Forms | Official add-on, free with every license |
 | Fluent Forms / Formidable / Ninja Forms | Check your version — most have it |
 
-This plugin's Gravity Forms integration exists for sites that haven't installed the official add-on. If you use the official add-on, turn the toggle off here so you don't get two widgets.
+This plugin deliberately covers only the surfaces with *no* native option: WordPress core forms, WooCommerce, and Elementor Pro Forms.
 
 ## Installation
 

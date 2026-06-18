@@ -2,7 +2,7 @@
 /**
  * Plugin Name: WP Cloudflare Turnstile
  * Plugin URI: https://github.com/limehawk/wp-cloudflare-turnstile
- * Description: Cloudflare Turnstile protection for WordPress core forms, WooCommerce, Elementor Pro Forms, and Gravity Forms.
+ * Description: Cloudflare Turnstile protection for WordPress core forms, WooCommerce, and Elementor Pro Forms.
  * Version: 2.0.1
  * Author: Limehawk
  * Author URI: https://limehawk.io
@@ -33,7 +33,6 @@ class Turnstile_Protection {
         "protect_comments" => 1,
         "woocommerce"      => 1,
         "elementor"        => 1,
-        "gravityforms"     => 1,
     ];
 
     public static function init() {
@@ -79,9 +78,6 @@ class Turnstile_Protection {
         require_once WPCFT_PLUGIN_DIR . "includes/integrations/woocommerce.php";
         if (self::enabled("elementor")) {
             require_once WPCFT_PLUGIN_DIR . "includes/integrations/elementor.php";
-        }
-        if (self::enabled("gravityforms")) {
-            require_once WPCFT_PLUGIN_DIR . "includes/integrations/gravity-forms.php";
         }
     }
 
@@ -146,7 +142,6 @@ class Turnstile_Protection {
             "protect_comments" => "Comment forms",
             "woocommerce"      => "WooCommerce (login, registration, lost password)",
             "elementor"        => "Elementor Pro Forms",
-            "gravityforms"     => "Gravity Forms (consider the official add-on instead)",
         ];
         ?>
         <div class="wrap">
@@ -181,7 +176,7 @@ class Turnstile_Protection {
                                     <?php echo esc_html($label); ?>
                                 </label>
                             <?php endforeach; ?>
-                            <p class="description">WooCommerce, Elementor, and Gravity Forms toggles only take effect when the plugin is active.</p>
+                            <p class="description">WooCommerce and Elementor toggles only take effect when the plugin is active.</p>
                         </td>
                     </tr>
                 </table>
